@@ -172,7 +172,7 @@ def post_processing(img, conf_thresh, nms_thresh, output):
     # [batch, num, num_classes]
     confs = output[1]
 
-    t1 = time.time()
+    # t1 = time.time()
 
     if type(box_array).__name__ != 'ndarray':
         box_array = box_array.cpu().detach().numpy()
@@ -187,7 +187,7 @@ def post_processing(img, conf_thresh, nms_thresh, output):
     max_conf = np.max(confs, axis=2)
     max_id = np.argmax(confs, axis=2)
 
-    t2 = time.time()
+    # t2 = time.time()
 
     bboxes_batch = []
     for i in range(box_array.shape[0]):
@@ -208,7 +208,7 @@ def post_processing(img, conf_thresh, nms_thresh, output):
 
             keep = nms_cpu(ll_box_array, ll_max_conf, nms_thresh)
 
-            if (keep.size > 0):
+            if keep.size > 0:
                 ll_box_array = ll_box_array[keep, :]
                 ll_max_conf = ll_max_conf[keep]
                 ll_max_id = ll_max_id[keep]
@@ -220,12 +220,12 @@ def post_processing(img, conf_thresh, nms_thresh, output):
 
         bboxes_batch.append(bboxes)
 
-    t3 = time.time()
-
-    print('-----------------------------------')
-    print('       max and argmax : %f' % (t2 - t1))
-    print('                  nms : %f' % (t3 - t2))
-    print('Post processing total : %f' % (t3 - t1))
-    print('-----------------------------------')
+    # t3 = time.time()
+    #
+    # print('-----------------------------------')
+    # print('       max and argmax : %f' % (t2 - t1))
+    # print('                  nms : %f' % (t3 - t2))
+    # print('Post processing total : %f' % (t3 - t1))
+    # print('-----------------------------------')
 
     return bboxes_batch

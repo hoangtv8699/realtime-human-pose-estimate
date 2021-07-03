@@ -144,13 +144,13 @@ def compute(net, original_img):
 
     input_data = src_img
 
-    center = np.array([w/2, h/2], dtype=np.float32)
+    center = np.array([w / 2, h / 2], dtype=np.float32)
     scale = np.array([1, 1], dtype=np.float32)
 
     # BGR format
     mean = [0.485, 0.456, 0.406]
     std = [0.229, 0.224, 0.225]
-    input_data = (input_data/255.0 - mean) / std
+    input_data = (input_data / 255.0 - mean) / std
     input_data = input_data[np.newaxis, :, :, :].transpose((0, 3, 1, 2))
     input_data = torch.from_numpy(input_data)
 
@@ -163,33 +163,37 @@ def compute(net, original_img):
     return preds, maxvals
 
 
-def keep_aspect(top_left, bottom_right, pose_img):
-    py1 = max(0, top_left[1])
-    py2 = min(pose_img.shape[0], bottom_right[1])
-    px1 = max(0, top_left[0])
-    px2 = min(pose_img.shape[1], bottom_right[0])
+def _boxs2cs(boxs, image_width, image_height):
+    cs = []
+    ss = []
+    for box in boxs:
+        c, s = _box2cs(box, image_width, image_height)
+        cs.append(c)
+        ss.append(s)
+    return cs, ss
 
-    shape = [384, 288]
-    aspect = shape[0]/shape[1]
-    ow = (px2-px1)
-    oh = (py2-py1)
-    oaspect = oh/ow
-    if aspect <= oaspect:
-        w = oh/aspect
-        px1 = px1 - (w-ow)/2
-        px2 = px1 + w
-    else:
-        h = ow*aspect
-        py1 = py1 - (h-oh)/2
-        py2 = py1 + h
 
-    px1 = int(px1)
-    px2 = int(px2)
-    py1 = int(py1)
-    py2 = int(py2)
+def _box2cs(box, image_width, image_height):
+    x, y, w, h = box[:4]
+    return _xywh2cs(x, y, w, h, image_width, image_height)
 
-    py1 = max(0, py1)
-    py2 = min(pose_img.shape[0], py2)
-    px1 = max(0, px1)
-    px2 = min(pose_img.shape[1], px2)
-    return px1, py1, px2, py2
+
+def _xywh2cs(x, y, w, h, image_width, image_height):
+    center = np.zeros((2), dtype=np.float32)
+    center[0] = x + w * 0.5
+    center[1] = y + h * 0.5
+
+    aspect_ratio = image_width * 1.0 / image_height
+    pixel_std = 200
+
+    if w > aspect_ratio * h:
+        h = w * 1.0 / aspect_ratio
+    elif w < aspect_ratio * h:
+        w = h * aspect_ratio
+    scale = np.array(
+        [w * 1.0 / pixel_std, h * 1.0 / pixel_std],
+        dtype=np.float32)
+    if center[0] != -1:
+        scale = scale * 1.25
+
+    return center, scale
