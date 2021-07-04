@@ -4,6 +4,7 @@ import cv2
 import numpy as np
 import torch
 import matplotlib.pyplot as plt
+import time
 
 
 def transform_preds(coords, center, scale, output_size):
@@ -121,14 +122,12 @@ def get_final_preds(batch_heatmaps, center, scale):
     #                                  hm[py+1][px]-hm[py-1][px]])
     #                 coords[n][p] += np.sign(diff) * .25
 
-    preds = coords.copy()
-
+    # preds = coords.copy()
     # Transform back
     for i in range(coords.shape[0]):
-        preds[i] = transform_preds(coords[i], center[i], scale[i],
-                                   [heatmap_width, heatmap_height])
-
-    return preds, maxvals
+        coords[i] = transform_preds(coords[i], center[i], scale[i],
+                                    [heatmap_width, heatmap_height])
+    return coords, maxvals
 
 
 def compute(net, original_img):
@@ -193,7 +192,8 @@ def _xywh2cs(x, y, w, h, image_width, image_height):
     scale = np.array(
         [w * 1.0 / pixel_std, h * 1.0 / pixel_std],
         dtype=np.float32)
-    if center[0] != -1:
-        scale = scale * 1.25
+    # if center[0] != -1:
+    #     scale = scale
 
     return center, scale
+
