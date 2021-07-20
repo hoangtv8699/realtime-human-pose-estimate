@@ -5,11 +5,11 @@ import torchvision.transforms as transforms
 import yaml
 from easydict import EasyDict
 
-from utils.pose_resnet_util import _boxs2cs, get_final_preds, get_affine_transform, _box2cs
-from tool.darknet2pytorch import Darknet
-from tool.torch_utils import *
-from tool.utils import *
-from utils.pose_resnet_model import *
+from pose_resnet.pose_resnet_util import _boxs2cs, get_final_preds, get_affine_transform, _box2cs
+from yolo.darknet2pytorch import Darknet
+from yolo.torch_utils import *
+from yolo.utils import *
+from pose_resnet.pose_resnet_model import *
 
 # yolo cfg
 yolov4_cfg = 'models/yolov4/yolov4.cfg'
